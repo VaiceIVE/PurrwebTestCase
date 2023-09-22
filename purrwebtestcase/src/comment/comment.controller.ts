@@ -4,8 +4,9 @@ import { CommentDto } from 'src/dtos/comment.dto';
 import { CommentUpdateDto } from 'src/dtos/commentUpdate.dto';
 import { CommentCreateDto } from 'src/dtos/commentCreate.dto';
 import { ApiCreatedResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ListGuard } from 'src/list/list.guard';
 import { JwtService } from '@nestjs/jwt';
+import { UserGuard } from 'src/user/user.guard';
+import { CommentGuard } from './comment.guard';
 
 @ApiTags('TrelloAPI')
 @Controller('users/:userId/lists/:listId/cards/:cardId/comments')
@@ -65,7 +66,7 @@ export class CommentController {
     @ApiResponse({
         description: "Comment successfully updated",
     })
-    @UseGuards(ListGuard)
+    @UseGuards(CommentGuard)
     @Post(':commentId')
     public async updateOneById(@Param('commentId') commentId: string, @Param('cardId') cardId: string, @Body() commentDto: CommentUpdateDto)
     {
@@ -81,7 +82,7 @@ export class CommentController {
     @ApiResponse({
         description: "Comment successfully deleted",
     })
-    @UseGuards(ListGuard)
+    @UseGuards(CommentGuard)
     @Delete(':commentId')
     public async deleteOne(@Param('commentId') commentId: string)
     {

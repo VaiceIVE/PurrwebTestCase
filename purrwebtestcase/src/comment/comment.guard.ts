@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import { CommentService } from './comment.service';
@@ -6,8 +6,8 @@ import { CommentService } from './comment.service';
 @Injectable()
 export class CommentGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
-    private commentService: CommentService
+    @Inject(JwtService) private jwtService: JwtService,
+    @Inject(CommentService) private commentService: CommentService
     ){}
   canActivate(
     context: ExecutionContext,
@@ -24,9 +24,7 @@ export class CommentGuard implements CanActivate {
 
       try
       {
-        const user = this.jwtService.verify(token)['id']
-        const owner = this.commentService.getOneById(req.params['commentId'])["owner_id"]
-        return user == owner
+        return this.validateRequest(context, token)
       }
       catch
       {
@@ -36,5 +34,16 @@ export class CommentGuard implements CanActivate {
       console.log(error)
       throw error
     }   
+  }
+  async validateRequest(context: ExecutionContext, token: string)
+  {
+    try {
+      const req = context.switchToHttp().getRequest()
+      const user = this.jwtService.verify(token)['id']
+      const owner = (await this.commentService.getOneById(req.params['commentId'])).dataValues["owner_id"]
+    return user == owner
+    } catch (error) {
+      throw error
+    }
   }
 }

@@ -20,6 +20,7 @@ export class ListController {
         type: ListDto,
       })
     @Post()
+    @UseGuards(ListGuard)
     public async createList(@Param('userId') userId: string, @Body() listDto: ListCreateDto): Promise<ListDto>
     {
         try {
